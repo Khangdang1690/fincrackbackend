@@ -7,6 +7,7 @@ import { BanksModule } from './banks/banks.module';
 import { ChatbotModule } from './chatbot/chatbot.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from '@/common';
+import { StockModule } from './stock/stock.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LoggingInterceptor } from '@/common';
     AuthModule,
     BanksModule,
     ChatbotModule,
+    StockModule,
   ],
   controllers: [],
   providers: [

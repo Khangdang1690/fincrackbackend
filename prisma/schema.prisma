@@ -21,6 +21,7 @@ model User {
   hash      String
   firstName String?
   lastName  String?
+  wishlist  String[] // Array of strings to represent an unordered set
 
   bankRecommendations BankRecommendation[]
 
