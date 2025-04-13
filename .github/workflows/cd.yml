@@ -1,0 +1,88 @@
+name: FinCrack Backend CD
+
+on:
+  workflow_run:
+    workflows: ['FinCrack Backend CI']
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag to deploy'
+        required: true
+        default: 'latest'
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            cd /path/to/deployment
+
+            # Create or update .env file for production
+            cat > .env << EOL
+            # Environment variables for Prisma
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+
+            # Environment
+            NODE_ENV=production
+
+            # Bank recommendation API URLs
+            BANK_RECOMMENDATION_DEV_URL=${{ secrets.BANK_RECOMMENDATION_DEV_URL }}
+            BANK_RECOMMENDATION_PROD_URL=${{ secrets.BANK_RECOMMENDATION_PROD_URL }}
+
+            # Service recommendation API URLs
+            SERVICE_BASE_URL_DEV=${{ secrets.SERVICE_BASE_URL_DEV }}
+            SERVICE_BASE_URL_PROD=${{ secrets.SERVICE_BASE_URL_PROD }}
+
+            # Frontend URLs
+            FRONTEND_DEV_URL=${{ secrets.FRONTEND_DEV_URL }}
+            FRONTEND_PROD_URL=${{ secrets.FRONTEND_PROD_URL }}
+
+            # Stock wishlist API URLs
+            WISHLIST_URL_DEV=${{ secrets.WISHLIST_URL_DEV }}
+            WISHLIST_URL_PROD=${{ secrets.WISHLIST_URL_PROD }}
+
+            # Nebius API configuration
+            NEBIUS_API_KEY=${{ secrets.NEBIUS_API_KEY }}
+            NEBIUS_API_BASE_URL=${{ secrets.NEBIUS_API_BASE_URL }}
+            NEBIUS_MODEL_ID=${{ secrets.NEBIUS_MODEL_ID }}
+
+            PORT=3000
+            EOL
+
+            # Pull the latest image
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/fincrack-backend:latest
+
+            # Update Docker Compose file if necessary
+            cat > docker-compose.yml << EOL
+            version: '3'
+
+            services:
+              fincrack-backend:
+                image: ${{ secrets.DOCKERHUB_USERNAME }}/fincrack-backend:latest
+                ports:
+                  - "3000:3000"
+                env_file:
+                  - .env
+                restart: always
+            EOL
+
+            # Restart services
+            docker-compose down
+            docker-compose up -d
+
+            # Clean up old images
+            docker image prune -f
+
+            echo "Deployment completed at $(date)"

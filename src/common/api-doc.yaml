@@ -1,0 +1,583 @@
+openapi: 3.0.0
+info:
+  title: FinCrack Backend API
+  description: API documentation for FinCrack financial services application
+  version: 1.0.0
+  contact:
+    name: FinCrack Support
+    email: support@fincrack.com
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.fincrack.com
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "67fad9697c3a9a61fec28a0a"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-04-12T21:21:45.773Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-04-12T21:21:45.773Z"
+        wishlist:
+          type: array
+          items:
+            type: string
+          example: ["AAPL", "MSFT", "AMZN"]
+    AuthDto:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          example: "Password123!"
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/User'
+    TickerDto:
+      type: object
+      required:
+        - ticker
+      properties:
+        ticker:
+          type: string
+          example: "AAPL"
+    StockMetricsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        stocks:
+          type: array
+          items:
+            type: object
+            properties:
+              ticker:
+                type: string
+                example: "AAPL"
+              currentPrice:
+                type: number
+                format: float
+                example: 198.15
+              metrics:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: "P/E"
+                    value:
+                      type: number
+                      format: float
+                      example: 31.45238
+                    description:
+                      type: string
+                      example: "Price-to-Earnings Ratio - Valuation relative to earnings"
+              success:
+                type: boolean
+                example: true
+    BankRecommendationDto:
+      type: object
+      properties:
+        "Digital Interface Rank":
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        "Number of Branches":
+          type: integer
+          example: 3
+        "Green Initiatives Rank":
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        "Fee Level Rank":
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 3
+        "International Support Rank":
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        "Interest Rate Range Rank":
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        "Customer Service Quality Rank":
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        "Capital Adequacy Rank":
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        "Auto Loans":
+          type: boolean
+          example: false
+        "Credit Cards":
+          type: boolean
+          example: true
+        "Global Banking":
+          type: boolean
+          example: true
+        "Investments":
+          type: boolean
+          example: true
+        "Loans":
+          type: boolean
+          example: false
+        "Mortgages":
+          type: boolean
+          example: true
+        "Savings Accounts":
+          type: boolean
+          example: true
+        "Global Customers":
+          type: boolean
+          example: true
+        "Professionals":
+          type: boolean
+          example: true
+        "SMEs":
+          type: boolean
+          example: false
+        "Seniors":
+          type: boolean
+          example: false
+        "Students":
+          type: boolean
+          example: false
+        "Tech-Savvy":
+          type: boolean
+          example: true
+    BankRecommendationResponse:
+      type: object
+      properties:
+        recommended_bank:
+          type: string
+          example: "Chase"
+        description:
+          type: string
+          example: "Chase offers excellent digital banking services with global reach. Their investment and mortgage options are particularly strong for professionals who value technological innovation."
+        website:
+          type: string
+          format: url
+          example: "https://www.chase.com"
+    ServiceRecommendationDto:
+      type: object
+      properties:
+        Age:
+          type: integer
+          minimum: 18
+          maximum: 100
+          example: 32
+        Gender:
+          type: string
+          example: "Female"
+        "Marital Status":
+          type: string
+          example: "Single"
+        "Income Level":
+          type: string
+          example: "Medium"
+        Occupation:
+          type: string
+          example: "Software Engineer"
+        "Residential Status":
+          type: string
+          example: "Rents"
+        Dependents:
+          type: integer
+          minimum: 0
+          example: 0
+        "Debt-to-Income":
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          example: 0.35
+        "Credit Score":
+          type: integer
+          minimum: 300
+          maximum: 850
+          example: 720
+        "Employment Status":
+          type: string
+          example: "Employed"
+        "Loan Purpose":
+          type: string
+          example: "Debt Consolidation"
+    ServiceRecommendationResponse:
+      type: object
+      properties:
+        best_recommendation:
+          type: string
+          example: "Personal Loan"
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          format: int32
+        message:
+          type: string
+        error:
+          type: string
+
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account with email and password
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthDto'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login with email and password
+      description: Authenticate a user and get a JWT token
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthDto'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /users/me:
+    get:
+      tags:
+        - User
+      summary: Get current user information
+      description: Retrieve the profile details of the currently authenticated user
+      operationId: getMe
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    put:
+      tags:
+        - User
+      summary: Update user profile
+      description: Update the first name and/or last name of the currently authenticated user
+      operationId: updateMe
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: "Jane"
+                lastName:
+                  type: string
+                  example: "Smith"
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /stock/wishlist:
+    post:
+      tags:
+        - Stock
+      summary: Add stock to wishlist
+      description: Add a ticker symbol to the user's stock wishlist
+      operationId: addToWishlist
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TickerDto'
+      responses:
+        '200':
+          description: Stock added to wishlist successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid ticker format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Ticker already exists in wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /stock/wishlist/{ticker}:
+    delete:
+      tags:
+        - Stock
+      summary: Remove stock from wishlist
+      description: Remove a ticker symbol from the user's stock wishlist
+      operationId: removeFromWishlist
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ticker
+          in: path
+          description: Ticker symbol to remove
+          required: true
+          schema:
+            type: string
+            example: "AAPL"
+      responses:
+        '200':
+          description: Stock removed from wishlist successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Ticker not found in wishlist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /stock/wishlist/metrics:
+    get:
+      tags:
+        - Stock
+      summary: Get metrics for all stocks in wishlist
+      description: Fetch detailed financial metrics for all stocks in the user's wishlist
+      operationId: getWishlistMetrics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Stock metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockMetricsResponse'
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Failed to fetch stock metrics from external API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /banks/recommendation:
+    post:
+      tags:
+        - Bank
+      summary: Get bank recommendation
+      description: Get a personalized bank recommendation based on user preferences
+      operationId: getBankRecommendation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BankRecommendationDto'
+      responses:
+        '200':
+          description: Bank recommendation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankRecommendationResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Failed to get recommendation from external API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /service/recommend:
+    post:
+      tags:
+        - Service
+      summary: Get service recommendation
+      description: Get a personalized financial service recommendation based on user profile
+      operationId: getServiceRecommendation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRecommendationDto'
+      responses:
+        '200':
+          description: Service recommendation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceRecommendationResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized - invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Failed to get recommendation from external API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 

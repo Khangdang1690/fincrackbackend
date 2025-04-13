@@ -9,6 +9,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from '@/common';
 import { StockModule } from './stock/stock.module';
 import { ServiceModule } from './service/service.module';
+import { DocsModule } from './docs/docs.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ServiceModule } from './service/service.module';
     ChatbotModule,
     StockModule,
     ServiceModule,
+    DocsModule,
   ],
   controllers: [],
   providers: [
