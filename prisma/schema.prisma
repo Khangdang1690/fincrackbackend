@@ -23,7 +23,8 @@ model User {
   lastName  String?
   wishlist  String[] // Array of strings to represent an unordered set
 
-  bankRecommendations BankRecommendation[]
+  bankRecommendations    BankRecommendation[]
+  serviceRecommendations ServiceRecommendation[]
 
   @@map("users")
 }
@@ -66,4 +67,30 @@ model BankRecommendation {
   recommendedBank String
 
   @@map("bank_recommendations")
+}
+
+model ServiceRecommendation {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+
+  // Input parameters
+  age               Int
+  gender            String
+  maritalStatus     String
+  incomeLevel       String
+  occupation        String
+  residentialStatus String
+  dependents        Int
+  debtToIncome      Float
+  creditScore       Int
+  employmentStatus  String
+  loanPurpose       String
+
+  // Output results
+  bestRecommendation String // Store just the best recommendation
+
+  @@map("service_recommendations")
 }

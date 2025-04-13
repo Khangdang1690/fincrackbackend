@@ -14,6 +14,7 @@ export class UserController extends BaseController<User> {
 
   @Get('me')
   getMe(@GetUser() user: User) {
+    console.log(`[${new Date().toISOString()}] GET /api/users/me accessed - User ID: ${user.id}, Email: ${user.email}`);
     return user;
   }
 
