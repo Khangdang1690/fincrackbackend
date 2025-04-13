@@ -18,10 +18,12 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
+          # Use package.json for caching since no lock file exists
           cache: 'npm'
+          cache-dependency-path: package.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma client
         run: npx prisma generate
@@ -83,9 +85,8 @@ jobs:
 
       - name: Handle Prisma schema changes
         run: |
-          # Remove node_modules to ensure clean Prisma generation
-          rm -rf node_modules
-          npm ci
+          # Use npm install instead of ci since there's no lock file
+          npm install
 
           # Push schema changes to database and generate client
           npx prisma db push
