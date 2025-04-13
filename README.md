@@ -21,102 +21,109 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-# FinCrackBackend
+# FinCrack Backend
 
-Backend for the FinCrack application built with NestJS, Prisma, and MongoDB.
+Backend service for the FinCrack application, built with NestJS, Prisma, and MongoDB.
 
-## Project Setup
+## Features
 
-### Prerequisites
-- Node.js (v18.x or later)
-- MongoDB (local or MongoDB Atlas)
+- User authentication with JWT
+- RESTful API endpoints
+- MongoDB integration via Prisma ORM
+- Dockerized for easy deployment
+- CI/CD pipeline with GitHub Actions
+
+## Prerequisites
+
+- Node.js 20.x
+- MongoDB
+- Docker (for containerized deployments)
+
+## Getting Started
 
 ### Installation
 
-```bash
-# Install dependencies
-$ npm install
-```
-
-### Database Setup
-
-1. Create a MongoDB database (locally or on MongoDB Atlas)
-2. Set up your environment variables:
-   - Create a `.env` file in the root directory (use `.env.example` as a template)
-   - Add your MongoDB connection string:
-   ```
-   DATABASE_URL="mongodb://username:password@localhost:27017/fincrack?authSource=admin"
-   ```
-   - Add your JWT secret:
-   ```
-   JWT_SECRET="your-jwt-secret"
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/fincrackbackend.git
+   cd fincrackbackend
    ```
 
-3. Generate Prisma client:
-```bash
-$ npx prisma generate
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-4. Push the schema to your database:
-```bash
-$ npx prisma db push
-```
+3. Create a `.env` file based on `.env.example`:
+   ```
+   DATABASE_URL="mongodb+srv://username:password@host/database"
+   JWT_SECRET="your-secret-key"
+   PORT=3000
+   NODE_ENV=development
+   ```
+
+4. Generate Prisma client:
+   ```bash
+   npx prisma generate
+   ```
 
 ### Running the Application
 
+Development mode:
 ```bash
-# Development mode
-$ npm run start:dev
-
-# Production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-### API Endpoints
-
-- `POST /auth/signup` - Register a new user
-- `POST /auth/login` - User login
-- `GET /users/me` - Get current user info (Protected)
-- `POST /banks/recommendation` - Get personalized bank recommendation (Protected)
-
-### Bank Recommendation Endpoint
-
-The `/banks/recommendation` endpoint accepts a POST request with the following parameters:
-
-```json
-{
-  "Digital Interface Rank": 4,             // Integer 1-5
-  "Number of Branches": 3,                 // Integer value
-  "Green Initiatives Rank": 5,             // Integer 1-5
-  "Fee Level Rank": 2,                     // Integer 1-5
-  "International Support Rank": 4,         // Integer 1-5
-  "Interest Rate Range Rank": 3,           // Integer 1-5
-  "Customer Service Quality Rank": 5,      // Integer 1-5
-  "Capital Adequacy Rank": 4,              // Integer 1-5
-  "Auto Loans": true,                      // Boolean
-  "Credit Cards": true,                    // Boolean
-  "Global Banking": false,                 // Boolean
-  "Investments": true,                     // Boolean
-  "Loans": true,                           // Boolean
-  "Mortgages": false,                      // Boolean
-  "Savings Accounts": true,                // Boolean
-  "Global Customers": false,               // Boolean
-  "Professionals": true,                   // Boolean
-  "SMEs": false,                           // Boolean
-  "Seniors": false,                        // Boolean
-  "Students": true,                        // Boolean
-  "Tech-Savvy": true                       // Boolean
-}
+Production build:
+```bash
+npm run build
+npm run start:prod
 ```
 
-The endpoint returns:
-```json
-{
-  "recommended_bank": "Bank Name",        // String
-  "description": "Description of the bank...",  // String
-  "website": "https://bank-website.com"   // String URL
-}
+### Testing
+
+Run unit tests:
+```bash
+npm test
 ```
+
+Run e2e tests:
+```bash
+npm run test:e2e
+```
+
+## Docker Deployment
+
+Build the Docker image:
+```bash
+docker build -t fincrack-backend .
+```
+
+Run the container:
+```bash
+docker run -p 3000:3000 --env-file .env fincrack-backend
+```
+
+## CI/CD Pipeline
+
+This project uses GitHub Actions for CI/CD. See [.github/workflows/ci-cd.yml](.github/workflows/ci-cd.yml) for the configuration.
+
+Required GitHub secrets for CI/CD:
+- `DATABASE_URL`: MongoDB connection string
+- `JWT_SECRET`: Secret key for JWT authentication
+- `DOCKERHUB_USERNAME`: Your Docker Hub username
+- `DOCKERHUB_TOKEN`: Your Docker Hub access token
+- `DEPLOY_HOST`: Production server hostname/IP
+- `DEPLOY_USER`: SSH username for deployment
+- `DEPLOY_KEY`: SSH private key for deployment
+
+## API Documentation
+
+API documentation is available at `/api/docs` when the server is running.
+
+## License
+
+[MIT](LICENSE)
 
 ## Project Structure
 
@@ -141,10 +148,6 @@ fincrackbackend/
 - If you encounter `Cannot find module './prisma/prisma.module'` error, it may be related to the build process. Try cleaning the dist directory with `rm -rf dist` and rebuilding.
 - If `PrismaClient` is not found, make sure you've run `npx prisma generate` to create the generated client.
 - Note the nested directory structure: there's a `fincrackbackend` directory inside the main `fincrackbackend` directory. When running commands, make sure you're in the correct directory.
-
-## License
-
-This project is licensed under the MIT License.
 
 ## Description
 

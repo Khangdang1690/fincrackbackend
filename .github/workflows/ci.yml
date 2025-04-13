@@ -1,0 +1,112 @@
+name: FinCrack Backend CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PORT: 3000
+          NODE_ENV: test
+
+  build_and_push:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create production .env file
+        run: |
+          cat > .env << EOL
+          # Environment variables for Prisma
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+
+          # Environment
+          NODE_ENV=production
+
+          # Bank recommendation API URLs
+          BANK_RECOMMENDATION_DEV_URL=${{ secrets.BANK_RECOMMENDATION_DEV_URL }}
+          BANK_RECOMMENDATION_PROD_URL=${{ secrets.BANK_RECOMMENDATION_PROD_URL }}
+
+          # Service recommendation API URLs
+          SERVICE_BASE_URL_DEV=${{ secrets.SERVICE_BASE_URL_DEV }}
+          SERVICE_BASE_URL_PROD=${{ secrets.SERVICE_BASE_URL_PROD }}
+
+          # Frontend URLs
+          FRONTEND_DEV_URL=${{ secrets.FRONTEND_DEV_URL }}
+          FRONTEND_PROD_URL=${{ secrets.FRONTEND_PROD_URL }}
+
+          # Stock wishlist API URLs
+          WISHLIST_URL_DEV=${{ secrets.WISHLIST_URL_DEV }}
+          WISHLIST_URL_PROD=${{ secrets.WISHLIST_URL_PROD }}
+
+          # Nebius API configuration
+          NEBIUS_API_KEY=${{ secrets.NEBIUS_API_KEY }}
+          NEBIUS_API_BASE_URL=${{ secrets.NEBIUS_API_BASE_URL }}
+          NEBIUS_MODEL_ID=${{ secrets.NEBIUS_MODEL_ID }}
+
+          PORT=3000
+          EOL
+
+      - name: Handle Prisma schema changes
+        run: |
+          # Remove node_modules to ensure clean Prisma generation
+          rm -rf node_modules
+          npm ci
+
+          # Push schema changes to database and generate client
+          npx prisma db push
+          npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/fincrack-backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/fincrack-backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/fincrack-backend:buildcache,mode=max
