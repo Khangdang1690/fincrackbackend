@@ -13,7 +13,7 @@ export class ChatbotController {
   constructor(private readonly chatbotService: ChatbotService) {}
 
   @Post('query')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async processQuery(
     @Body() queryDto: ChatbotQueryDto,
     @GetUser() user: User,
