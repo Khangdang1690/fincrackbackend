@@ -26,7 +26,7 @@ export class ChatbotService {
 
   async processQuery(
     queryDto: ChatbotQueryDto,
-    userId: string,
+    userId?: string,
   ): Promise<ChatbotResponseDto> {
     try {
       // First, do a simple keyword check as a quick filter
