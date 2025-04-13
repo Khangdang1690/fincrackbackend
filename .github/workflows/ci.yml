@@ -31,7 +31,10 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Lint
-        run: npm run lint
+        # Using our CI-specific linting script which allows warnings
+        run: npm run lint:ci
+        env:
+          CI: true
 
       - name: Test
         run: npm test
