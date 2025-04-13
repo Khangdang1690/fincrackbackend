@@ -4,6 +4,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { BanksModule } from './banks/banks.module';
+import { ChatbotModule } from './chatbot/chatbot.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { LoggingInterceptor } from '@/common';
 
@@ -12,10 +13,11 @@ import { LoggingInterceptor } from '@/common';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule, 
-    UserModule, 
+    PrismaModule,
+    UserModule,
     AuthModule,
     BanksModule,
+    ChatbotModule,
   ],
   controllers: [],
   providers: [
@@ -23,6 +25,6 @@ import { LoggingInterceptor } from '@/common';
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
-  ]
+  ],
 })
 export class AppModule {}
